@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hack Cognition - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.9; font-size: 1.1rem; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+        }
+        .stat-card h3 {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .stat-value.success { color: #22c55e; }
+        .stat-value.warning { color: #f59e0b; }
+        .stat-value.danger { color: #ef4444; }
+        .section {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #334155;
+        }
+        .section h2 {
+            margin-bottom: 1rem;
+            color: #fff;
+            font-size: 1.25rem;
+        }
+        .new-deal-form {
+            display: grid;
+            gap: 1rem;
+            max-width: 400px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .contracts-list {
+            display: grid;
+            gap: 1rem;
+        }
+        .contract-item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        .contract-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .contract-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .risk-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .risk-low { background: #22c55e20; color: #22c55e; }
+        .risk-medium { background: #f59e0b20; color: #f59e0b; }
+        .risk-high { background: #ef444420; color: #ef4444; }
+        .contract-preview {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+        .api-section {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .api-section code {
+            color: #22c55e;
+        }
+        .chart-container {
+            height: 200px;
+            display: flex;
+            align-items: end;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 4px 4px 0 0;
+            min-height: 20px;
+            position: relative;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        .nav {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            background: #334155;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Hack Cognition</h1>
+        <p>Sistema de Análise de Contratos com IA Jurídica</p>
+    </div>
+
+    <div class="container">
+        <nav class="nav">
+            <a href="/dashboard" class="active">Dashboard</a>
+            <a href="/contracts">Contratos</a>
+            <a href="/docs">API Docs</a>
+        </nav>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total de Contratos</h3>
+                <div class="stat-value" id="total-contracts">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Valor Total Negociado</h3>
+                <div class="stat-value success" id="total-value">R$ 0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Risco Médio</h3>
+                <div class="stat-value warning" id="avg-risk">Médio</div>
+            </div>
+            <div class="stat-card">
+                <h3>Desconto Médio</h3>
+                <div class="stat-value">10%</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Nova Negociação</h2>
+            <form class="new-deal-form" id="deal-form">
+                <div class="form-group">
+                    <label for="price">Valor da Negociação (R$)</label>
+                    <input type="number" id="price" name="price" value="20000" min="1000" step="1000" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Gerar Contrato & Análise</button>
+            </form>
+            <div id="result" style="margin-top: 1rem;"></div>
+        </div>
+
+        <div class="section">
+            <h2>Distribuição de Risco</h2>
+            <div class="chart-container" id="risk-chart">
+                <div class="bar" style="height: 30%">
+                    <span class="bar-label">Baixo</span>
+                </div>
+                <div class="bar" style="height: 60%">
+                    <span class="bar-label">Médio</span>
+                </div>
+                <div class="bar" style="height: 10%">
+                    <span class="bar-label">Alto</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Últimos Contratos</h2>
+            <div class="contracts-list" id="contracts-list">
+                <div class="empty-state">
+                    Nenhum contrato gerado ainda. Use o formulário acima para criar um.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>API Endpoint</h2>
+            <div class="api-section">
+                <code>POST /deal</code><br><br>
+                Request:<br>
+                <code>{"price": 20000}</code><br><br>
+                Response:<br>
+                <code>{"contract_id", "contract", "summary", "clauses", "risk"}</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let contracts = [];
+
+        document.getElementById('deal-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const price = document.getElementById('price').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<p style="color: #667eea;">Processando...</p>';
+            
+            try {
+                const response = await fetch('/deal', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({price: parseFloat(price)})
+                });
+                
+                const data = await response.json();
+                contracts.unshift(data);
+                updateDashboard();
+                
+                resultDiv.innerHTML = `
+                    <div style="background: #0f172a; padding: 1rem; border-radius: 8px; border-left: 4px solid #22c55e;">
+                        <strong style="color: #22c55e;">✅ Contrato #${data.contract_id} gerado!</strong><br>
+                        <small style="color: #94a3b8;">Risco: ${data.risk.level} | Score: ${data.risk.score}</small>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ef4444;">Erro: ${error.message}</p>`;
+            }
+        });
+
+        function updateDashboard() {
+            document.getElementById('total-contracts').textContent = contracts.length;
+            
+            const totalValue = contracts.reduce((sum, c) => {
+                const match = c.contract.match(/R\$ ([\d.,]+)/);
+                return sum + (match ? parseFloat(match[1].replace('.', '').replace(',', '.')) : 0);
+            }, 0);
+            document.getElementById('total-value').textContent = `R$ ${totalValue.toLocaleString('pt-BR')}`;
+            
+            if (contracts.length > 0) {
+                const avgScore = contracts.reduce((sum, c) => sum + c.risk.score, 0) / contracts.length;
+                const avgRisk = avgScore <= 3 ? 'Baixo' : avgScore <= 6 ? 'Médio' : 'Alto';
+                const riskEl = document.getElementById('avg-risk');
+                riskEl.textContent = avgRisk;
+                riskEl.className = 'stat-value ' + (avgScore <= 3 ? 'success' : avgScore <= 6 ? 'warning' : 'danger');
+            }
+            
+            const list = document.getElementById('contracts-list');
+            if (contracts.length === 0) return;
+            
+            list.innerHTML = contracts.slice(0, 5).map(c => `
+                <div class="contract-item">
+                    <div class="contract-header">
+                        <span class="contract-id">Contrato #${c.contract_id}</span>
+                        <span class="risk-badge risk-${c.risk.level.toLowerCase()}">${c.risk.level}</span>
+                    </div>
+                    <div class="contract-preview">${c.summary}</div>
+                </div>
+            `).join('');
+            
+            // Update chart
+            const low = contracts.filter(c => c.risk.level === 'Baixo').length;
+            const med = contracts.filter(c => c.risk.level === 'Médio').length;
+            const high = contracts.filter(c => c.risk.level === 'Alto').length;
+            const max = Math.max(low, med, high, 1);
+            
+            document.getElementById('risk-chart').innerHTML = `
+                <div class="bar" style="height: ${(low/max*100)}%"><span class="bar-label">Baixo (${low})</span></div>
+                <div class="bar" style="height: ${(med/max*100)}%"><span class="bar-label">Médio (${med})</span></div>
+                <div class="bar" style="height: ${(high/max*100)}%"><span class="bar-label">Alto (${high})</span></div>
+            `;
+        }
+    </script>
+</body>
+</html>

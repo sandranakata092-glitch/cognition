@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contratos - Hack Cognition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 2rem; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .nav {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            background: #334155;
+            color: #fff;
+        }
+        .contract-detail {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #334155;
+        }
+        .contract-detail h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        .meta {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            color: #94a3b8;
+        }
+        .meta-item strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .section-title {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin: 1.5rem 0 0.75rem;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+        .contract-text {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+        .clauses-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+        .clause-item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        .clause-type {
+            color: #667eea;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .risk-box {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .risk-low { background: #22c55e20; border: 1px solid #22c55e; }
+        .risk-medium { background: #f59e0b20; border: 1px solid #f59e0b; }
+        .risk-high { background: #ef444420; border: 1px solid #ef4444; }
+        .risk-score {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .risk-low .risk-score { color: #22c55e; }
+        .risk-medium .risk-score { color: #f59e0b; }
+        .risk-high .risk-score { color: #ef4444; }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .search-box {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Contratos</h1>
+    </div>
+
+    <div class="container">
+        <nav class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/contracts" class="active">Contratos</a>
+            <a href="/docs">API Docs</a>
+        </nav>
+
+        <input type="text" class="search-box" placeholder="Buscar contrato por ID..." id="search">
+
+        <div id="contracts-container">
+            <p style="text-align: center; color: #64748b; padding: 3rem;">
+                Carregando contratos...
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function loadContracts() {
+            try {
+                const response = await fetch('/api/contracts');
+                const contracts = await response.json();
+                
+                const container = document.getElementById('contracts-container');
+                
+                if (contracts.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #64748b;">
+                            <p>Nenhum contrato encontrado.</p>
+                            <a href="/dashboard" class="btn">Criar Primeiro Contrato</a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = contracts.map(c => `
+                    <div class="contract-detail">
+                        <h2>Contrato #${c.id}</h2>
+                        
+                        <div class="meta">
+                            <div class="meta-item">
+                                <strong>Criado em</strong>
+                                ${new Date(c.created_at).toLocaleString('pt-BR')}
+                            </div>
+                            <div class="meta-item">
+                                <strong>Status</strong>
+                                Ativo
+                            </div>
+                        </div>
+                        
+                        <div class="section-title">Contrato</div>
+                        <div class="contract-text">${c.content}</div>
+                        
+                        <a href="/dashboard" class="btn">← Voltar ao Dashboard</a>
+                    </div>
+                `).join('');
+                
+                // Search functionality
+                document.getElementById('search').addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    document.querySelectorAll('.contract-detail').forEach(el => {
+                        const text = el.textContent.toLowerCase();
+                        el.style.display = text.includes(term) ? 'block' : 'none';
+                    });
+                });
+                
+            } catch (error) {
+                document.getElementById('contracts-container').innerHTML = `
+                    <p style="text-align: center; color: #ef4444; padding: 3rem;">
+                        Erro ao carregar contratos: ${error.message}
+                    </p>
+                `;
+            }
+        }
+        
+        loadContracts();
+    </script>
+</body>
+</html>

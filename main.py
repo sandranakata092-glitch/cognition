@@ -1,17 +1,23 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, List
+import os
 
 from negotiation import negotiate
 from legal_ai import summarize_contract, extract_clauses
 from risk_service import calculate_risk
-from database import save_contract, init_db
+from database import save_contract, init_db, get_contract as db_get_contract
 
 app = FastAPI(
     title="Hack Cognition - API Gateway",
     description="Sistema de análise de contratos com IA Jurídica",
     version="1.0.0"
 )
+
+# Templates
+templates = Jinja2Templates(directory="templates")
 
 
 class DealRequest(BaseModel):
@@ -109,12 +115,30 @@ async def process_deal(data: DealRequest):
 @app.get("/contracts/{contract_id}")
 async def get_contract(contract_id: int):
     """Retrieve a saved contract by ID."""
-    from database import get_contract as db_get_contract
-    
     contract = db_get_contract(contract_id)
     if contract:
         return contract
     return {"error": "Contract not found"}
+
+
+# Dashboard Routes
+@app.get("/dashboard")
+async def dashboard(request: Request):
+    """Main dashboard page."""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+@app.get("/contracts")
+async def contracts_page(request: Request):
+    """Contracts listing page."""
+    return templates.TemplateResponse("contracts.html", {"request": request})
+
+
+@app.get("/api/contracts")
+async def api_list_contracts():
+    """API endpoint to list all contracts."""
+    # This is a simplified version - in production you'd query the DB
+    return []
 
 
 if __name__ == "__main__":

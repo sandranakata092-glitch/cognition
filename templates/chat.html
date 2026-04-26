@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat com IA - Hack Cognition</title>
+    <script src="https://download.agora.io/sdk/release/AgoraChat_sdk_1.1.0.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.75rem; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+        }
+        .nav {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav a:hover, .nav a.active {
+            background: #334155;
+            color: #fff;
+        }
+        .chat-container {
+            flex: 1;
+            background: #1e293b;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            padding: 1rem;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .ai-info h3 {
+            color: #fff;
+            font-size: 1rem;
+        }
+        .ai-info p {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+        .status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #22c55e;
+            font-size: 0.875rem;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .message.ai {
+            align-self: flex-start;
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        .message.user .message-header {
+            color: #fff;
+        }
+        .message.ai .message-header {
+            color: #667eea;
+        }
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-left: auto;
+            font-weight: normal;
+        }
+        .typing {
+            display: flex;
+            gap: 0.25rem;
+            padding: 1rem;
+        }
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        .chat-input {
+            padding: 1rem;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            display: flex;
+            gap: 0.75rem;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .chat-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .chat-input button {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .chat-input button:hover {
+            opacity: 0.9;
+        }
+        .chat-input button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            flex-wrap: wrap;
+        }
+        .quick-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quick-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .contract-card {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.75rem;
+            border-left: 4px solid #667eea;
+        }
+        .contract-card h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        .risk-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        .risk-low { background: #22c55e20; color: #22c55e; }
+        .risk-medium { background: #f59e0b20; color: #f59e0b; }
+        .risk-high { background: #ef444420; color: #ef4444; }
+        code {
+            background: #0f172a;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Assistente Jurídico IA</h1>
+    </div>
+
+    <div class="container">
+        <nav class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/contracts">Contratos</a>
+            <a href="/chat" class="active">Chat IA</a>
+            <a href="/docs">API</a>
+        </nav>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="ai-avatar">🤖</div>
+                <div class="ai-info">
+                    <h3>Nexa Orion</h3>
+                    <p>Assistente de Análise de Contratos</p>
+                </div>
+                <div class="status">
+                    <span class="status-dot"></span>
+                    Online
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="sendQuick('Criar contrato de R$ 50000')">💰 Contrato R$50k</button>
+                <button class="quick-btn" onclick="sendQuick('Analisar risco de multa alta')">⚠️ Análise Risco</button>
+                <button class="quick-btn" onclick="sendQuick('Resumir contrato automaticamente')">📝 Resumo</button>
+                <button class="quick-btn" onclick="sendQuick('Extrair cláusulas importantes')">📋 Cláusulas</button>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai">
+                    <div class="message-header">
+                        🤖 Nexa Orion
+                        <span class="message-time">Agora</span>
+                    </div>
+                    Olá! Sou a Nexa Orion, sua assistente jurídica com IA. Posso ajudar você a:
+                    <ul style="margin-top: 0.5rem; margin-left: 1.25rem;">
+                        <li>Criar contratos de compra e venda</li>
+                        <li>Analisar riscos jurídicos</li>
+                        <li>Extrair e resumir cláusulas</li>
+                        <li>Calcular scores de risco</li>
+                    </ul>
+                    Como posso ajudar hoje?
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Digite sua mensagem..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()" id="send-btn">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('chat-messages');
+        const input = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function sendQuick(text) {
+            input.value = text;
+            sendMessage();
+        }
+
+        function addMessage(text, isUser = false, extraHTML = '') {
+            const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user' : 'ai'}`;
+            div.innerHTML = `
+                <div class="message-header">
+                    ${isUser ? '👤 Você' : '🤖 Nexa Orion'}
+                    <span class="message-time">${time}</span>
+                </div>
+                ${text}
+                ${extraHTML}
+            `;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function showTyping() {
+            const typing = document.createElement('div');
+            typing.className = 'typing';
+            typing.id = 'typing-indicator';
+            typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            messagesDiv.appendChild(typing);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            input.value = '';
+            sendBtn.disabled = true;
+            showTyping();
+
+            try {
+                // Process the message through our AI pipeline
+                const response = await processWithAI(text);
+                hideTyping();
+                addMessage(response.text, false, response.extra || '');
+            } catch (error) {
+                hideTyping();
+                addMessage(`Desculpe, ocorreu um erro: ${error.message}. Tente novamente.`, false);
+            }
+
+            sendBtn.disabled = false;
+        }
+
+        async function processWithAI(text) {
+            const lower = text.toLowerCase();
+            
+            // Check for contract creation request
+            const priceMatch = text.match(/R\$?\s?(\d[\d.,]*)/);
+            const hasContractKeywords = lower.includes('contrato') || lower.includes('criar') || lower.includes('gerar');
+            
+            if (priceMatch && hasContractKeywords) {
+                const price = parseFloat(priceMatch[1].replace('.', '').replace(',', '.'));
+                
+                const res = await fetch('/deal', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({price: price})
+                });
+                
+                const data = await res.json();
+                
+                const riskClass = data.risk.level === 'Baixo' ? 'risk-low' : 
+                                 data.risk.level === 'Médio' ? 'risk-medium' : 'risk-high';
+                
+                return {
+                    text: `Contrato #${data.contract_id} gerado com sucesso!`,
+                    extra: `
+                        <div class="contract-card">
+                            <h4>📄 Resumo do Contrato</h4>
+                            <p><strong>Valor:</strong> R$ ${(price * 0.9).toLocaleString('pt-BR')}</p>
+                            <p><strong>Desconto:</strong> 10% aplicado</p>
+                            <p><strong>Cláusulas:</strong> ${data.clauses.length} detectadas</p>
+                            <span class="risk-badge ${riskClass}">Risco: ${data.risk.level} (${data.risk.score} pts)</span>
+                        </div>
+                    `
+                };
+            }
+            
+            // Check for analysis requests
+            if (lower.includes('risco') || lower.includes('analisar')) {
+                return {
+                    text: `Para analisar o risco de um contrato, eu preciso que você primeiro crie um contrato informando o valor. Use comandos como:<br><br>
+                    <code>"Criar contrato de R$ 50000"</code><br><br>
+                    Depois de criado, posso calcular o score de risco baseado nas cláusulas de multa e prazo.`
+                };
+            }
+            
+            if (lower.includes('cláusula') || lower.includes('clausula')) {
+                return {
+                    text: `As cláusulas são extraídas automaticamente quando um contrato é criado. Eu identifico:<br><br>
+                    • <strong>Multa:</strong> Penalidades por cancelamento (3 pts de risco)<br>
+                    • <strong>Prazo:</strong> Tempo de conclusão (2 pts de risco)<br>
+                    • <strong>Valor:</strong> Montante negociado (1 pt de risco)<br><br>
+                    Crie um contrato para ver as cláusulas em ação!`
+                };
+            }
+            
+            if (lower.includes('resumo') || lower.includes('summarize')) {
+                return {
+                    text: `O resumo automático extrai os pontos-chave do contrato:<br><br>
+                    • Valor negociado<br>
+                    • Forma de pagamento (ex: PIX)<br>
+                    • Multas e penalidades<br>
+                    • Prazos de entrega<br><br>
+                    Basta criar um contrato que eu gero o resumo para você!`
+                };
+            }
+            
+            // Default response
+            return {
+                text: `Entendi! Posso ajudar com várias tarefas:<br><br>
+                📝 <strong>Criar contrato:</strong> "Criar contrato de R$ 30000"<br>
+                ⚠️ <strong>Analisar risco:</strong> "Qual o risco deste contrato?"<br>
+                📋 <strong>Ver cláusulas:</strong> "Quais as cláusulas do contrato #1?"<br>
+                💡 <strong>Dúvidas:</strong> Pergunte sobre multas, prazos, valores<br><br>
+                Use os botões rápidos abaixo ou digite seu comando!`
+            };
+        }
+    </script>
+</body>
+</html>

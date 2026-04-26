@@ -134,6 +134,12 @@ async def contracts_page(request: Request):
     return templates.TemplateResponse("contracts.html", {"request": request})
 
 
+@app.get("/chat")
+async def chat_page(request: Request):
+    """AI Chat interface page."""
+    return templates.TemplateResponse("chat.html", {"request": request})
+
+
 @app.get("/api/contracts")
 async def api_list_contracts():
     """API endpoint to list all contracts."""

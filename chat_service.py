@@ -71,7 +71,7 @@ def get_chat_response(message: str, session_id: str = "default") -> str:
         # Call Groq API
         chat_completion = groq_client.chat.completions.create(
             messages=_conversations[session_id],
-            model="mixtral-8x7b-32768",  # Fast and capable model
+            model="llama3-8b-8192",  # Fast and capable model
             temperature=0.7,
             max_tokens=2048,
             top_p=0.9,

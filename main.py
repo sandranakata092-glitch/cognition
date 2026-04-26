@@ -10,6 +10,7 @@ from negotiation import negotiate
 from legal_ai import summarize_contract, extract_clauses
 from risk_service import calculate_risk
 from database import save_contract, init_db, get_contract as db_get_contract
+from chat_service import get_chat_response
 
 app = FastAPI(
     title="Hack Cognition - API Gateway",
@@ -40,6 +41,18 @@ class DealResponse(BaseModel):
     summary: str
     clauses: list
     risk: Dict[str, Any]
+
+
+class ChatRequest(BaseModel):
+    """Request model for chat messages."""
+    message: str
+    session_id: str = "default"
+
+
+class ChatResponse(BaseModel):
+    """Response model for chat."""
+    response: str
+    session_id: str
 
 
 @app.on_event("startup")
@@ -146,6 +159,17 @@ async def api_list_contracts():
     """API endpoint to list all contracts."""
     # This is a simplified version - in production you'd query the DB
     return []
+
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_endpoint(request: ChatRequest):
+    """Chat endpoint with Groq AI integration.
+    
+    This endpoint processes user messages through the Groq AI
+    and returns contextual responses about contract analysis.
+    """
+    response = get_chat_response(request.message, request.session_id)
+    return ChatResponse(response=response, session_id=request.session_id)
 
 
 if __name__ == "__main__":

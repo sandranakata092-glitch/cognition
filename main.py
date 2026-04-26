@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Dict, Any, List
 import os
@@ -135,9 +136,9 @@ async def contracts_page(request: Request):
 
 
 @app.get("/chat")
-async def chat_page(request: Request):
+async def chat_page():
     """AI Chat interface page."""
-    return templates.TemplateResponse("chat.html", {"request": request})
+    return FileResponse("templates/chat.html")
 
 
 @app.get("/api/contracts")
